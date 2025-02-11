@@ -144,7 +144,6 @@
 
 
 
-
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
@@ -160,7 +159,6 @@ const stats = ref([]);
 const categories = ref([]);
 const brands = ref([]);
 
-
 // Initialize reactive variables for sales data
 const thisMonthSales = ref(0);
 const previousMonthSales = ref(0);
@@ -169,8 +167,13 @@ const cashOnStore = ref(0);
 const mobilePayment = ref(0);
 
 const loadSalesData = () => {
-  const storedData = localStorage.getItem("salesData");
-  return storedData ? JSON.parse(storedData) : null;
+  try {
+    const storedData = localStorage.getItem("salesData");
+    return storedData ? JSON.parse(storedData) : null;
+  } catch (error) {
+    console.error("Error parsing salesData from localStorage:", error);
+    return null;
+  }
 };
 
 // On component mount, load and store the data
@@ -178,8 +181,8 @@ onMounted(() => {
   const salesData = loadSalesData();
   
   if (salesData) {
-    const thisMonth = salesData.thisMonth;
-    const previousMonth = salesData.previousMonth;
+    const thisMonth = salesData.thisMonth || {};
+    const previousMonth = salesData.previousMonth || {};
 
     // Store the sales data in separate variables
     thisMonthSales.value = thisMonth.total || 0;
@@ -190,7 +193,6 @@ onMounted(() => {
     mobilePayment.value = thisMonth.mobilePayment || 0;
   }
 });
-
 
 const menuItems = [
   { name: "Dashboard", path: "/dashboard", icon: "LayoutDashboard", active: true },
@@ -216,9 +218,13 @@ const filteredMenuItems = computed(() => {
 
 onMounted(() => {
   // Load shop data from localStorage
-  const savedShop = localStorage.getItem("shopData");
-  if (savedShop) {
-    shop.value = JSON.parse(savedShop); // Populate shop data from localStorage
+  try {
+    const savedShop = localStorage.getItem("shopData");
+    if (savedShop) {
+      shop.value = JSON.parse(savedShop); // Populate shop data from localStorage
+    }
+  } catch (error) {
+    console.error("Error parsing shopData from localStorage:", error);
   }
   shopUrl.value = window.location.origin + "/shop"; // Adjust shop page link
 });
@@ -228,32 +234,21 @@ const chartCanvas = ref(null);
 const thisMonthTotal = ref(0);
 const previousMonthTotal = ref(0);
 
-/*const loadSalesData = () => {
-  const storedData = localStorage.getItem("salesData");
-  return storedData ? JSON.parse(storedData) : null;
-};*/
-
 onMounted(() => {
-
-
-  
-
-  
-
   const salesData = loadSalesData();
 
   if (salesData && chartCanvas.value) {
-    const thisMonth = salesData.thisMonth;
-    const previousMonth = salesData.previousMonth;
+    const thisMonth = salesData.thisMonth || {};
+    const previousMonth = salesData.previousMonth || {};
 
-    thisMonthTotal.value = thisMonthSales;
-    previousMonthTotal.value = previousMonthSales;
+    thisMonthTotal.value = thisMonth.total || 0;
+    previousMonthTotal.value = previousMonth.total || 0;
 
     const chartData = {
       labels: ["Cash on Delivery", "Mobile Payment", "Other"],
       datasets: [
         {
-          data: [thisMonth.cashOnDelivery, thisMonth.mobilePayment, thisMonth.cashOnStore],
+          data: [thisMonth.cashOnDelivery || 0, thisMonth.mobilePayment || 0, thisMonth.cashOnStore || 0],
           backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"],
           hoverBackgroundColor: ["#FF4567", "#3B85D1", "#FFB84F"],
         },

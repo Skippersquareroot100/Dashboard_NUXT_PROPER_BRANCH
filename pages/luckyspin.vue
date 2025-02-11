@@ -66,44 +66,73 @@
       <div class="flex h-screen justify-center items-center bg-gradient-to-b from-red-800 to-red-950">
       
           <div class="flex flex-col items-center">
-    <!-- Set Cooldown Time -->
-    <div class="mt-4">
-      <label class="block text-lg font-medium">Set Cooldown Time</label>
-      <div class="flex gap-4">
-        <!-- Hours Input -->
-        <input
-          v-model.number="cooldownHours"
-          type="number"
-          class="border rounded p-2 w-1/2"
-          placeholder="Hours"
-          min="0"
-        />
-        <!-- Minutes Input -->
-        <input
-          v-model.number="cooldownMinutes"
-          type="number"
-          class="border rounded p-2 w-1/2"
-          placeholder="Minutes"
-          min="0"
-        />
-      </div>
-    </div>
 
-    <!-- Submit and Reset Buttons -->
-    <div class="flex gap-4 mt-4">
-      <button @click="submitCooldown" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-400">
-        Submit
-      </button>
-      <button @click="resetInputs" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-400">
-        Reset
-      </button>
-    </div>
+
+    
+   <!-- Set Cooldown Time -->
+<!-- Set Cooldown Time -->
+<div class="mt-4">
+  <label for="cooldownTime" class="block text-lg font-medium">Set Cooldown Time</label>
+  <input
+    type="time"
+    id="cooldownTime"
+    v-model="cooldownTime"
+    class="border rounded p-2 w-full bg-white"
+  />
+</div>
+
+<!-- Submit and Reset Buttons -->
+<div class="flex gap-4 mt-4">
+  <button @click="submitCooldown" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-400">
+    Submit
+  </button>
+  <button @click="resetInputs" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-400">
+    Reset
+  </button>
+</div>
+
+
+
 
     <!-- Countdown Display -->
     <div class="mt-4">
       <p class="text-lg font-semibold">{{ countdown }}</p>
     </div>
+
+         <!-- Spinner Item Box with Click to Edit -->
+         <div class="w-full h-full flex justify-center items-center">
+              <div class="grid grid-cols-4 gap-4">
+                <div
+                  v-for="(item, index) in items"
+                  :key="index"
+                  class="relative flex justify-center items-center p-2 border-2 border-gray-300 rounded-md cursor-pointer hover:bg-gray-200"
+                  @click="openEditModal(index)"
+                >
+                  {{ item }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Modal for Editing Item Names -->
+            <div v-if="isModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+              <div class="bg-white p-6 rounded shadow-md max-w-sm w-full">
+                <label for="item-name" class="block text-lg font-medium">Edit Item Name</label>
+                <input id="item-name" v-model="newItemName" class="border rounded p-2 w-full" />
+                <div class="mt-4 flex justify-end gap-4">
+                  <button @click="closeModal" class="bg-gray-300 text-black px-4 py-2 rounded">Cancel</button>
+                  <button @click="saveItemName" class="bg-blue-500 text-white px-4 py-2 rounded">Save</button>
+                </div>
+              </div>
+            </div>
+
   </div>
+
+     
+
+
+      
+       
+  
 
 
         <div class="min-h-screen bg-gradient-to-b from-red-800 to-red-950 flex flex-col items-center justify-center p-6 relative">
@@ -173,10 +202,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-
-
-
-
+import axios from 'axios';
 
 
 const menuItems = [
@@ -189,6 +215,8 @@ const menuItems = [
     { name: "Cupon", path: "/cupon", icon: "BarChart" },
     { name: "Invoicing", path: "/invoicing", icon: "BarChart" },
     { name: "Lucky Spin", path: "/luckyspin", icon: "BarChart" },
+    { name: "Billing", path: "/billing", icon: "BarChart" },
+
   ];
   
   // Initialize shop as a reactive object
@@ -199,6 +227,42 @@ const menuItems = [
     return menuItems.filter(item => item.name.toLowerCase().includes(searchQuery.value.toLowerCase()));
   });
   
+
+
+
+
+
+  const isModalOpen = ref(false);
+const selectedItemIndex = ref(null);
+const newItemName = ref('');
+
+// Open the modal and set the item to be edited
+const openEditModal = (index) => {
+  selectedItemIndex.value = index;
+  newItemName.value = items.value[index]; // Set the current item name
+  isModalOpen.value = true;
+};
+
+// Close the modal without saving changes
+const closeModal = () => {
+  isModalOpen.value = false;
+  newItemName.value = '';
+};
+
+// Save the new name and update the items array
+const saveItemName = () => {
+  if (selectedItemIndex.value !== null && newItemName.value.trim() !== '') {
+    items.value[selectedItemIndex.value] = newItemName.value;
+    // Save updated items to localStorage
+    localStorage.setItem("items", JSON.stringify(items.value));
+    saveToServer();
+    closeModal();
+  }
+
+
+  
+};
+
 
 
 
@@ -222,13 +286,79 @@ const cooldownActive = ref(false); // Prevents re-submitting cooldown
 // Shop Data
 const shop = ref({ name: "", logo: "" });
 
+
+
+
+const submitCooldown = () => {
+  if (cooldownActive.value) return; // Prevent submitting while cooldown is active
+
+  if (!cooldownTime.value) {
+    console.error("No cooldown time selected");
+    return;
+  }
+
+  const [hours, minutes] = cooldownTime.value.split(":").map(Number); // Extract HH:MM
+  const now = new Date();
+  const selectedTime = new Date(now);
+  selectedTime.setHours(hours, minutes, 0, 0); // Set the cooldown end time to today
+
+  // If selected time is in the past, set it for the next day
+  if (selectedTime <= now) {
+    selectedTime.setDate(selectedTime.getDate() + 1); // Move to the next day
+  }
+
+  // Calculate the exact timestamp when cooldown expires
+  const cooldownEndTime = selectedTime.getTime();
+
+  // Store the exact cooldown end time in localStorage
+  localStorage.setItem("cooldownEndTime", cooldownEndTime);
+
+  canSpin.value = false;
+  cooldownActive.value = true;
+  
+  // Start countdown using the stored cooldown end time
+  startCountdown(cooldownEndTime - Date.now());
+};
+
+
+
+
+
 onMounted(() => {
   const savedShop = localStorage.getItem("shopData");
   if (savedShop) {
     shop.value = JSON.parse(savedShop);
+
   }
 
+  const savedItems = localStorage.getItem("items");
+  if (savedItems) {
+    items.value = JSON.parse(savedItems);
+  } 
+
   loadFromLocalStorage();
+
+
+
+
+    // Restore cooldown timer if it was set before refresh
+  const cooldownEndTime = localStorage.getItem("cooldownEndTime");
+
+if (cooldownEndTime) {
+  const timeLeft = cooldownEndTime - Date.now();
+
+  if (timeLeft > 0) {
+    canSpin.value = false;
+    cooldownActive.value = true;
+    startCountdown(timeLeft);
+  } else {
+    canSpin.value = true;
+    cooldownActive.value = false;
+    countdown.value = "Ready to Spin!";
+  }
+}
+
+
 });
 
 // Items for Spin Wheel
@@ -280,11 +410,22 @@ const checkSpinAvailability = () => {
   }
 };
 
+
+
+
+
+
+
+
+
+
+
 // Start Countdown Timer
-const startCountdown = (timeLeft) => {
+const startCountdown = (timeLeftMs) => {
   canSpin.value = false;
   cooldownActive.value = true;
-  const endTime = Date.now() + timeLeft;
+
+  const endTime = Date.now() + timeLeftMs;
 
   const interval = setInterval(() => {
     const remainingTime = endTime - Date.now();
@@ -292,7 +433,7 @@ const startCountdown = (timeLeft) => {
     if (remainingTime <= 0) {
       clearInterval(interval);
       canSpin.value = true;
-      cooldownActive.value = false; // Allow changing cooldown again
+      cooldownActive.value = false;
       countdown.value = "Ready to Spin!";
     } else {
       const hours = Math.floor(remainingTime / (1000 * 60 * 60));
@@ -301,8 +442,9 @@ const startCountdown = (timeLeft) => {
       countdown.value = `${hours}h ${minutes}m ${seconds}s left`;
     }
   }, 1000);
-
 };
+
+
 
 
 
@@ -326,36 +468,7 @@ selectedRotationIndex.value = randomIndex;
 
 
 
-const submitCooldown = () => {
- 
-  setTimeout(() => {
-  location.reload();
-}, 5);
-  
-// Optionally log these values to the console
 
- // Pick a random index from the rotationValues array
- 
-// You can proceed with any additional logic here
-
-
-  if (cooldownActive.value)
-  {
-    return;
-  } // Prevent submitting while cooldown is running
-
-  const cooldownMs = (cooldownHours.value * 60 * 60 * 1000) + (cooldownMinutes.value * 60 * 1000);
-  lastSpinTime.value = Date.now();
-  saveToLocalStorage();
-
-  canSpin.value = false;
-  cooldownActive.value = true; // Prevent re-submitting cooldown
-  startCountdown(cooldownMs);
-  
-
- 
-
-};
 
 
 
@@ -389,6 +502,30 @@ const spin = () => {
 };
 
 // Submit Cooldown Time
+
+
+const saveToServer = async () => {
+  try {
+    const response = await axios.post('/your-api-endpoint', {
+      items: items.value,  // Send the array from localStorage
+    });
+    console.log('Items saved successfully:', response.data);
+  } catch (error) {
+    console.error('Error saving items:', error);
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
 
 </script>
 

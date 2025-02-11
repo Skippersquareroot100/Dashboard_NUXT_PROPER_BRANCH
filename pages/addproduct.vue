@@ -270,6 +270,7 @@ const menuItems = [
   { name: "Coupon", path: "/coupon", icon: "BarChart" },
   { name: "Invoicing", path: "/invoicing", icon: "BarChart" },
   { name: "Lucky Spin", path: "/luckyspin", icon: "BarChart" },
+  { name: "Billing", path: "/billing", icon: "BarChart" },
 ];
 
 // Search functionality
