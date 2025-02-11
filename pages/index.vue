@@ -1,133 +1,274 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-[#DCE1FF] transition-all duration-300">
-    <div class="flex w-full max-w-4xl px-4">
-      <!-- Left side - Branding -->
-      <div
-        class="w-0 sm:w-1/2 bg-gradient-to-br from-blue-600 to-blue-800 p-8 rounded-l-lg hidden sm:flex sm:flex-col sm:justify-center">
-        <h1 class="text-white text-4xl font-bold mb-4">Your E-commerce</h1>
-        <p class="text-white text-xl">Shop with us and discover amazing deals!</p>
-      </div>
+  <div class="flex h-screen bg-gray-50">
+    <!-- Sidebar -->
+    <aside class="w-2/5 sm:w-64 bg-gray-900 text-white transition-all duration-300 flex-shrink-0 overflow-auto">
+      <div class="p-2 sm:p-4">
+        <div class="flex items-center gap-2 text-sm sm:text-xl font-bold">
+          <div class="w-6 sm:w-8 h-6 sm:h-8 bg-red-500 rounded-lg"></div>
+          <span class="ml-3">{{ shop.name ? shop.name + "'s" : 'ACTIVE' }}<span
+              class="text-red-500">Platform</span></span>
 
-      <!-- Right side - Login Form -->
-      <div class="w-full sm:w-1/2 p-1 bg-white dark:bg-gray-800 rounded-lg sm:rounded-l-none shadow-md relative">
-        <LoaderComponent v-if="AuthStore.isLoading" :isLoading="true" />
 
-        <div class="p-8">
-          <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-8 text-center">
-            {{ AuthStore.isLoading ? 'Logging In!' : 'Log In' }}
-          </h2>
-          <form @submit.prevent="handleLogin" class="space-y-4">
-            <div>
-              <input v-model="email" type="email" id="email" placeholder="Email address" required
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-300"
-                :disabled="AuthStore.isLoading" />
-            </div>
-            <div>
-              <input v-model="password" type="password" id="password" placeholder="Password" required
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-300"
-                :disabled="AuthStore.isLoading" />
-            </div>
-            <button type="submit"
-              class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 relative overflow-hidden transition-all duration-300"
-              :disabled="AuthStore.isLoading">
-              <span class="relative" :class="{ invisible: AuthStore.isLoading }">Log In</span>
-              <SpinnerLoader v-if="AuthStore.isLoading" />
-            </button>
-
-            <!-- Error message -->
-            <div class="min-h-[24px] text-red-600 dark:text-red-400 text-sm text-center">
-              {{ error }}
-            </div>
-          </form>
-
-          <!-- New Go to Dashboard Button 
-          <button
-            @click="handleLogin"
-            class="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 relative overflow-hidden transition-all duration-300 mt-4"
-          >
-            Go to Dashboard
-          </button>-->
-
-          <!-- Social Login Buttons -->
-          <div class="mt-6 space-y-4">
-            <button @click="handleGoogleLogin"
-              class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-300 group">
-              <svg class="h-5 w-5 mr-2 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24"
-                fill="currentColor">
-                <path
-                  d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" />
-              </svg>
-              Sign in with Google
-            </button>
-            <button @click="handleFacebookLogin"
-              class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-300 group">
-              <svg class="h-5 w-5 mr-2 transition-transform duration-300 group-hover:scale-110" fill="currentColor"
-                viewBox="0 0 24 24">
-                <path
-                  d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-              </svg>
-              Sign in with Facebook
-            </button>
-          </div>
-
-          <div class="mt-6 text-center">
-            <NuxtLink to="/register" class="text-blue-600 dark:text-blue-400 hover:underline">
-              Create new account
-            </NuxtLink>
-          </div>
         </div>
       </div>
+
+      <!-- Search Bar -->
+      <div class="px-2 sm:px-4 mt-2 sm:mt-6">
+        <input v-model="searchQuery" type="search" placeholder="Search"
+          class="w-full px-2 sm:px-4 py-1 sm:py-2 bg-gray-800 rounded-md text-xs sm:text-sm" />
+      </div>
+
+      <!-- Menu Items -->
+      <nav class="mt-3 sm:mt-6">
+        <template v-for="(item, index) in filteredMenuItems" :key="index">
+          <router-link :to="item.path"
+            class="flex items-center px-2 sm:px-4 py-2 sm:py-3 text-gray-300 hover:bg-gray-800">
+            <component :is="item.icon" class="w-5 h-5" />
+            <span class="ml-3">{{ item.name }}</span>
+          </router-link>
+
+        </template>
+
+      </nav>
+
+
+      <router-link to="/" class=" mx-7 py-80  text-red-500    text-left block">
+        Logout
+      </router-link>
+
+
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 overflow-auto transition-all duration-300">
+      <!-- Header (Sticky at Top, Outside of Main) -->
+      <header class="bg-white border-b sticky top-0 z-10">
+        <div class="flex items-center justify-between px-6 py-4">
+          <div class="flex items-center space-x-4">
+            <!-- Add content if necessary -->
+          </div>
+          <div class="flex items-center space-x-4">
+            <!-- Circle for logo image -->
+            <div class="flex items-center space-x-4">
+              <router-link to="/manageShop" class="w-9 h-9 rounded-full overflow-hidden cursor-pointer">
+                <img v-if="shop.logo" :src="shop.logo" alt="Shop Logo" class="w-full h-full object-cover" />
+                <img v-else src="/avatar-placeholder.png" alt="Default Logo" class="w-full h-full object-cover" />
+              </router-link>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Dashboard Content -->
+      <main class="p-4 mt-0.5">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          <!-- Cards for Total Stats -->
+          <div class="bg-white p-6 rounded-lg shadow-sm flex flex-col items-center justify-center">
+            <h3 class="text-4xl font-bold mb-1 overflow-auto">{{ Storestats.Tcustomer }}</h3>
+            <p class="text-gray-500 text-sm"><b>Total Customers</b></p>
+          </div>
+
+          <div class="bg-white p-6 rounded-lg shadow-sm flex flex-col items-center justify-center">
+            <h3 class="text-4xl font-bold mb-1 overflow-auto">{{ Storestats.Tproduct }}</h3>
+            <p class="text-gray-500 text-sm"><b>Total Products</b></p>
+          </div>
+
+          <div class="bg-white p-6 rounded-lg shadow-sm flex flex-col items-center justify-center">
+            <h3 class="text-4xl font-bold mb-1 overflow-auto">{{ Storestats.Tbrands }}</h3>
+            <p class="text-gray-500 text-sm"><b>Active Cupon</b></p>
+          </div>
+
+          <div class="bg-white p-6 rounded-lg shadow-sm flex flex-col items-center justify-center">
+            <h3 class="text-4xl font-bold mb-1 overflow-auto">{{ Storestats.Torder }}</h3>
+            <p class="text-gray-500 text-sm"><b>Total Orders</b></p>
+          </div>
+        </div>
+
+        <!-- Categories and Brands Section -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6 ">
+          <router-link to="/categories" class="bg-white p-6 rounded-lg shadow-sm cursor-pointer">
+            <h3 class="font-semibold mb-4">Top Category</h3>
+            <div class="space-y-3 overflow-auto">
+              <div v-for="category in categories" :key="category.name" class="flex justify-between">
+                <span>{{ category.name }}</span>
+                <span>${{ category.value.toLocaleString() }}</span>
+              </div>
+            </div>
+          </router-link>
+
+          <router-link to="/brands" class="bg-white p-6 rounded-lg shadow-sm cursor-pointer">
+            <h3 class="font-semibold mb-4">Top Brands</h3>
+            <div class="space-y-3 overflow-auto">
+              <div v-for="brand in brands" :key="brand.name" class="flex justify-between">
+                <span>{{ brand.name }}</span>
+                <span>${{ brand.value.toLocaleString() }}</span>
+              </div>
+            </div>
+          </router-link>
+        </div>
+
+        <!-- Orders Stats -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <router-link to="orders-stats" class="bg-white p-6 rounded-lg shadow-sm cursor-pointer">
+            <h3 class="text-4xl font-bold text-purple-500 mb-2">153</h3>
+            <p class="text-gray-500 mb-4">Total Order</p>
+            <button class="w-full mt-4 bg-purple-500 text-white py-2 rounded-md hover:bg-purple-600">
+              All Orders
+            </button>
+          </router-link>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+            <div class="col-span-2 bg-white p-6 rounded-lg shadow-sm">
+              <h3 class="font-semibold mb-4">
+                Sales Distribution for This Month
+              </h3>
+              <canvas ref="chartCanvas"></canvas>
+
+              <div class="mt-4">
+                <p>
+                  <strong>Total Sales for This Month:</strong> ${{ thisMonthTotal }}
+                </p>
+                <p>
+                  <strong>Total Sales for Previous Month:</strong> ${{ previousMonthTotal }}
+                  <p>{{ thisMonthSales  }} {{  previousMonthSales }}</p>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
-    <BubbleLoading v-if="AuthStore.isLoading" class="hidden lg:block" />
   </div>
+ 
 </template>
 
-<script setup lang="ts">
-import { useAuthStore } from '@/store/modules/auth'
 
 
+<script setup>
+import { ref, computed, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import Chart from "chart.js/auto";
+import { useStateStore } from '@/stores/useDataStore';
 
-const email = ref('mehidy.gb@gmail.com')
-const password = ref('12345678')
-const error = ref(null)
-const AuthStore = useAuthStore()
-const router = useRouter()
+const router = useRouter();
 
-const handleLogin = async () => {
-  await router.push('/dashboard') // Using named route
-}
+// Initialize state from the store
+const Storestats = useStateStore();
 
+const stats = ref([]);
+const categories = ref([]);
+const brands = ref([]);
 
+// Initialize reactive variables for sales data
+const thisMonthSales = ref(0);
+const previousMonthSales = ref(0);
+const cashOnDelivery = ref(0);
+const cashOnStore = ref(0);
+const mobilePayment = ref(0);
 
-const handleGoogleLogin = () => {
-  console.log('Google login clicked')
-}
+const loadSalesData = () => {
+  try {
+    const storedData = localStorage.getItem("salesData");
+    return storedData ? JSON.parse(storedData) : null;
+  } catch (error) {
+    console.error("Error parsing salesData from localStorage:", error);
+    return null;
+  }
+};
 
-const handleFacebookLogin = () => {
-  console.log('Facebook login clicked')
-}
+// On component mount, load and store the data
+onMounted(() => {
+  const salesData = loadSalesData();
+  
+  if (salesData) {
+    const thisMonth = salesData.thisMonth || {};
+    const previousMonth = salesData.previousMonth || {};
+
+    // Store the sales data in separate variables
+    thisMonthSales.value = thisMonth.total || 0;
+    previousMonthSales.value = previousMonth.total || 0;
+
+    cashOnDelivery.value = thisMonth.cashOnDelivery || 0;
+    cashOnStore.value = thisMonth.cashOnStore || 0;
+    mobilePayment.value = thisMonth.mobilePayment || 0;
+  }
+});
+
+const menuItems = [
+  { name: "Dashboard", path: "/dashboard", icon: "LayoutDashboard", active: true },
+  { name: "Products", path: "/products", icon: "Package" },
+  { name: "Orders", path: "/orders", icon: "ShoppingCart" },
+  { name: "Customers", path: "/customers", icon: "Package" },
+  { name: "Reports", path: "/reports", icon: "BarChart" },
+  { name: "Manage Shop", path: "/manageShop", icon: "BarChart" },
+  { name: "Cupon", path: "/cupon", icon: "BarChart" },
+  { name: "Invoicing", path: "/invoicing", icon: "BarChart" },
+  { name: "Lucky Spin", path: "/luckyspin", icon: "BarChart" },
+];
+
+// Initialize shop as a reactive object
+const shop = ref({ logo: null });
+const shopUrl = ref("");
+
+// Reactive search query
+const searchQuery = ref("");
+const filteredMenuItems = computed(() => {
+  return menuItems.filter(item => item.name.toLowerCase().includes(searchQuery.value.toLowerCase()));
+});
+
+onMounted(() => {
+  // Load shop data from localStorage
+  try {
+    const savedShop = localStorage.getItem("shopData");
+    if (savedShop) {
+      shop.value = JSON.parse(savedShop); // Populate shop data from localStorage
+    }
+  } catch (error) {
+    console.error("Error parsing shopData from localStorage:", error);
+  }
+  shopUrl.value = window.location.origin + "/shop"; // Adjust shop page link
+});
+
+// Sales Data
+const chartCanvas = ref(null);
+const thisMonthTotal = ref(0);
+const previousMonthTotal = ref(0);
+
+onMounted(() => {
+  const salesData = loadSalesData();
+
+  if (salesData && chartCanvas.value) {
+    const thisMonth = salesData.thisMonth || {};
+    const previousMonth = salesData.previousMonth || {};
+
+    thisMonthTotal.value = thisMonth.total || 0;
+    previousMonthTotal.value = previousMonth.total || 0;
+
+    const chartData = {
+      labels: ["Cash on Delivery", "Mobile Payment", "Other"],
+      datasets: [
+        {
+          data: [thisMonth.cashOnDelivery || 0, thisMonth.mobilePayment || 0, thisMonth.cashOnStore || 0],
+          backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"],
+          hoverBackgroundColor: ["#FF4567", "#3B85D1", "#FFB84F"],
+        },
+      ],
+    };
+
+    new Chart(chartCanvas.value, {
+      type: "pie",
+      data: chartData,
+      options: {
+        responsive: true,
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: (tooltipItem) => `$${tooltipItem.raw.toLocaleString()}`,
+            },
+          },
+        },
+      },
+    });
+  }
+});
 </script>
-
-<style scoped>
-body {
-  overflow: hidden;
-}
-
-.animate-pulse {
-  display: flex;
-  gap: 1rem;
-  animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-
-  0%,
-  100% {
-    transform: scale(1);
-  }
-
-  50% {
-    transform: scale(1.2);
-  }
-}
-</style>
