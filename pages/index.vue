@@ -1,133 +1,244 @@
+
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-[#DCE1FF] transition-all duration-300">
-    <div class="flex w-full max-w-4xl px-4">
-      <!-- Left side - Branding -->
-      <div
-        class="w-0 sm:w-1/2 bg-gradient-to-br from-blue-600 to-blue-800 p-8 rounded-l-lg hidden sm:flex sm:flex-col sm:justify-center">
-        <h1 class="text-white text-4xl font-bold mb-4">Your E-commerce</h1>
-        <p class="text-white text-xl">Shop with us and discover amazing deals!</p>
+  <div class="flex h-screen bg-gray-50">
+    <!-- Sidebar -->
+    <aside class="w-2/5 sm:w-64 bg-gray-900 text-white transition-all duration-300 flex-shrink-0 overflow-auto"> 
+      <div class="p-2 sm:p-4">
+        <div class="flex items-center gap-2 text-sm sm:text-xl font-bold">
+          <div class="w-6 sm:w-8 h-6 sm:h-8 bg-red-500 rounded-lg"></div>
+          <span class="ml-3">{{ shop.name ? shop.name + "'s" : 'ACTIVE' }}<span class="text-red-500">Platform</span></span>
+
+        </div>
       </div>
 
-      <!-- Right side - Login Form -->
-      <div class="w-full sm:w-1/2 p-1 bg-white dark:bg-gray-800 rounded-lg sm:rounded-l-none shadow-md relative">
-        <LoaderComponent v-if="AuthStore.isLoading" :isLoading="true" />
+      <!-- Search Bar -->
+      <div class="px-2 sm:px-4 mt-2 sm:mt-6">
+        <input v-model="searchQuery" type="search" placeholder="Search"
+          class="w-full px-2 sm:px-4 py-1 sm:py-2 bg-gray-800 rounded-md text-xs sm:text-sm" />
+      </div>
 
-        <div class="p-8">
-          <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-8 text-center">
-            {{ AuthStore.isLoading ? 'Logging In!' : 'Log In' }}
-          </h2>
-          <form @submit.prevent="handleLogin" class="space-y-4">
-            <div>
-              <input v-model="email" type="email" id="email" placeholder="Email address" required
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-300"
-                :disabled="AuthStore.isLoading" />
-            </div>
-            <div>
-              <input v-model="password" type="password" id="password" placeholder="Password" required
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-300"
-                :disabled="AuthStore.isLoading" />
-            </div>
-            <button type="submit"
-              class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 relative overflow-hidden transition-all duration-300"
-              :disabled="AuthStore.isLoading">
-              <span class="relative" :class="{ invisible: AuthStore.isLoading }">Log In</span>
-              <SpinnerLoader v-if="AuthStore.isLoading" />
-            </button>
+      <!-- Menu Items -->
+      <nav class="mt-3 sm:mt-6">
+        <template v-for="(item, index) in filteredMenuItems" :key="index">
+          <router-link :to="item.path" class="flex items-center px-2 sm:px-4 py-2 sm:py-3 text-gray-300 hover:bg-gray-800">
+            <component :is="item.icon" class="w-5 h-5" />
+            <span class="ml-3">{{ item.name }}</span>
+          </router-link>
+        </template>
+      </nav>
+      <router-link to="/" class=" mx-7 py-80  text-red-500    text-left block">
+      Logout
+    </router-link>
+    </aside>
 
-            <!-- Error message -->
-            <div class="min-h-[24px] text-red-600 dark:text-red-400 text-sm text-center">
-              {{ error }}
-            </div>
-          </form>
-
-          <!-- New Go to Dashboard Button 
-          <button
-            @click="handleLogin"
-            class="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 relative overflow-hidden transition-all duration-300 mt-4"
-          >
-            Go to Dashboard
-          </button>-->
-
-          <!-- Social Login Buttons -->
-          <div class="mt-6 space-y-4">
-            <button @click="handleGoogleLogin"
-              class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-300 group">
-              <svg class="h-5 w-5 mr-2 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24"
-                fill="currentColor">
-                <path
-                  d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" />
-              </svg>
-              Sign in with Google
-            </button>
-            <button @click="handleFacebookLogin"
-              class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-300 group">
-              <svg class="h-5 w-5 mr-2 transition-transform duration-300 group-hover:scale-110" fill="currentColor"
-                viewBox="0 0 24 24">
-                <path
-                  d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-              </svg>
-              Sign in with Facebook
-            </button>
+    <!-- Main Content -->
+    <div class="flex-1 overflow-auto transition-all duration-300">
+      <!-- Header (Sticky at Top, Outside of Main) -->
+      <header class="bg-white border-b sticky top-0 z-10">
+        <div class="flex items-center justify-between px-6 py-4">
+          <div class="flex items-center space-x-4">
+            <!-- Add content if necessary -->
           </div>
-
-          <div class="mt-6 text-center">
-            <NuxtLink to="/register" class="text-blue-600 dark:text-blue-400 hover:underline">
-              Create new account
-            </NuxtLink>
+          <div class="flex items-center space-x-4">
+    <router-link to="/manageShop" class="w-9 h-9 rounded-full overflow-hidden cursor-pointer">
+      <img 
+        v-if="shop.logo" 
+        :src="shop.logo" 
+        alt="Shop Logo" 
+        class="w-full h-full object-cover" />
+      <img 
+        v-else 
+        src="/avatar-placeholder.png" 
+        alt="Default Logo" 
+        class="w-full h-full object-cover" />
+    </router-link>
+    </div>
+        </div>
+      </header>
+       
+      <!-- Dashboard Content -->
+      <main class="p-4 mt-0.5">
+        <div class="min-h-screen bg-white p-6">
+      <div class="max-w-2xl mx-auto bg-white shadow-lg rounded-lg p-6 border border-gray-200">
+        <h2 class="text-3xl font-semibold text-blue-500 text-center mb-6">🛍 Manage Shop</h2>
+  
+        <!-- Success Message -->
+        <p v-if="message" class="text-green-700 font-medium text-center bg-green-100 p-2 rounded mb-4">
+          {{ message }}
+        </p>
+  
+        <div class="grid grid-cols-1 gap-4">
+          <!-- Business ID (Read-only) -->
+          <div>
+            <label class="block text-sm font-medium text-gray-600">Business ID</label>
+            <input v-model="shop.businessId" type="text" class="w-full border-gray-300 p-2 rounded bg-gray-100" readonly />
           </div>
+  
+          <!-- Business Name -->
+          <div>
+            <label class="block text-sm font-medium text-gray-600">Business Name</label>
+            <input v-model="shop.name" type="text"
+              class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 bg-gray-100 text-gray-900" />
+          </div>
+  
+          <!-- Business Type -->
+          <div>
+            <label class="block text-sm font-medium text-gray-600">Business Type</label>
+            <input v-model="shop.type" type="text"
+              class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 bg-gray-100 text-gray-900" />
+          </div>
+  
+          <!-- Shop Email -->
+          <div>
+            <label class="block text-sm font-medium text-gray-600">Shop Email</label>
+            <input v-model="shop.email" type="email"
+              class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 bg-gray-100 text-gray-900" />
+          </div>
+  
+          <!-- Phone Number -->
+          <div>
+            <label class="block text-sm font-medium text-gray-600">Shop Phone Number</label>
+            <input v-model="shop.phone" type="text"
+              class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 bg-gray-100 text-gray-900" />
+          </div>
+  
+          <!-- Country -->
+          <div>
+            <label class="block text-sm font-medium text-gray-600">Country</label>
+            <input v-model="shop.country" type="text"
+              class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 bg-gray-100 text-gray-900" />
+          </div>
+  
+          <!-- Address -->
+          <div>
+            <label class="block text-sm font-medium text-gray-600">Shop Address</label>
+            <input v-model="shop.address" type="text"
+              class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 bg-gray-100 text-gray-900" />
+          </div>
+  
+          <!-- Topbar Announcement -->
+          <div>
+            <label class="block text-sm font-medium text-gray-600">Topbar Announcement</label>
+            <textarea v-model="shop.announcement"
+              class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 bg-gray-100 text-gray-900"></textarea>
+          </div>
+  
+          <!-- Logo Upload -->
+          <div>
+            <label class="block text-sm font-medium text-gray-600">Upload Logo</label>
+            <input type="file" @change="handleLogoUpload" class="w-full border p-2 rounded bg-gray-100" />
+            <div v-if="shop.logo" class="mt-2">
+              <img :src="shop.logo" alt="Shop Logo" class="w-24 h-24 rounded-md object-cover border shadow-md" />
+            </div>
+          </div>
+  
+          <!-- QR Code -->
+          <div class="text-center mt-6">
+            <p class="text-sm text-gray-600 mb-2">Shop QR Code</p>
+            <div class="p-3 bg-gray-100 rounded-lg border shadow-md inline-block">
+              <QrcodeVue :value="shopUrl" size="140" class="mx-auto" />
+            </div>
+          </div>
+  
+          <!-- Update Button -->
+          <button @click="updateShopInfo"
+            class="w-full bg-gradient-to-r from-red-500 to-red-600 text-white py-2 mt-4 rounded-lg hover:shadow-xl transition transform hover:scale-105">
+            Update Shop Info
+          </button>
         </div>
       </div>
     </div>
-    <BubbleLoading v-if="AuthStore.isLoading" class="hidden lg:block" />
+
+
+      </main>
+    </div>
   </div>
 </template>
 
-<script setup lang="ts">
-import { useAuthStore } from '@/store/modules/auth'
 
+<script setup>
+import { ref, computed, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import QrcodeVue from "qrcode.vue";
 
+/* ---------------------- Sidebar Menu Data ---------------------- */
+const menuItems = [
+  { name: "Dashboard", path: "/dashboard", icon: "LayoutDashboard", active: true },
+  { name: "Products", path: "/products", icon: "Package" },
+  { name: "Orders", path: "/orders", icon: "ShoppingCart" },
+  { name: "Customers", path: "/customers", icon: "Package" },
+  { name: "Reports", path: "/reports", icon: "BarChart" },
+  { name: "Manage Shop", path: "/manageShop", icon: "BarChart" },
+  { name: "Cupon", path: "/cupon", icon: "BarChart" },
+  { name: "Invoicing", path: "/invoicing", icon: "BarChart" },
+  { name: "Lucky Spin", path: "/luckyspin", icon: "BarChart" },
+  { name: "Billing", path: "/billing", icon: "BarChart" },
+];
 
-const email = ref('mehidy.gb@gmail.com')
-const password = ref('12345678')
-const error = ref(null)
-const AuthStore = useAuthStore()
-const router = useRouter()
+/* ---------------------- Sidebar Search Functionality ---------------------- */
+const searchQuery = ref("");
+const filteredMenuItems = computed(() =>
+  menuItems.filter((item) =>
+    item.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+  )
+);
 
-const handleLogin = async () => {
-  await router.push('/dashboard') // Using named route
-}
+/* ---------------------- Shop Data State ---------------------- */
+const shop = ref({
+  businessId: "72792",
+  name: "Akever",
+  type: "Clothing & Apparel",
+  email: "hasanmaruf0055@gmail.com",
+  phone: "01400551001",
+  country: "Bangladesh",
+  address: "Dhaka",
+  announcement: "",
+  logo: "",
+});
 
+const shopUrl = ref(""); // Shop page URL
+const message = ref(""); // Success message
 
+// Create router instance
+const router = useRouter();
 
-const handleGoogleLogin = () => {
-  console.log('Google login clicked')
-}
+/* ---------------------- Load Data from Local Storage on Mount ---------------------- */
+onMounted(() => {
+  const savedShop = localStorage.getItem("shopData");
+  if (savedShop) {
+    shop.value = JSON.parse(savedShop); // Populate shop data from localStorage
+  }
+  shopUrl.value = window.location.origin + "/shop"; // Adjust shop page link
+});
 
-const handleFacebookLogin = () => {
-  console.log('Facebook login clicked')
-}
+/* ---------------------- Handle Logo Upload ---------------------- */
+const handleLogoUpload = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      shop.value.logo = e.target.result; // Save as Base64
+      // Store the updated shop data in localStorage
+      localStorage.setItem("shopData", JSON.stringify(shop.value));
+    };
+    reader.readAsDataURL(file);
+  }
+};
+
+/* ---------------------- Update Shop Info ---------------------- */
+const updateShopInfo = () => {
+  // Confirm the action before proceeding
+  if (confirm("Are you sure you want to update the shop info?")) {
+    // Update localStorage only if confirmed
+    localStorage.setItem("shopData", JSON.stringify(shop.value));
+    message.value = "✅ Shop information updated successfully!";
+    
+    // Redirect to dashboard after a short delay
+    setTimeout(() => {
+      message.value = "";
+      router.push("/dashboard");
+    }, 500);
+  }
+};
 </script>
 
-<style scoped>
-body {
-  overflow: hidden;
-}
-
-.animate-pulse {
-  display: flex;
-  gap: 1rem;
-  animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-
-  0%,
-  100% {
-    transform: scale(1);
-  }
-
-  50% {
-    transform: scale(1.2);
-  }
-}
-</style>
